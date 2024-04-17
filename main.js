@@ -1,10 +1,11 @@
 import * as THREE from 'three'
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import  { OrbitControls }  from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 const scene = new THREE.Scene()
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 100)
 const renderer = new THREE.WebGLRenderer()
-const controls = new THREE.OrbitControls(camera, renderer.domElement)
+const controls = new OrbitControls(camera, renderer.domElement)
 const radius = 30
 
 controls.enablePan = false
@@ -35,3 +36,27 @@ material.side = THREE.BackSide
 
 const sphere = new THREE.Mesh(geometry, material)
 scene.add(sphere)
+
+function animate() {
+    requestAnimationFrame(animate)
+  
+    renderer.render(scene, camera)
+  }
+  
+  animate()
+
+  window.addEventListener('resize', onWindowResize)
+
+function onWindowResize() {
+  camera.aspect = window.innerWidth / window.innerHeight
+  camera.updateProjectionMatrix()
+
+  renderer.setSize(window.innerWidth, window.innerHeight)
+}
+
+renderer.domElement.addEventListener('wheel', handleZoom)
+
+function handleZoom(e) {
+  camera.fov = clamp(camera.fov + e.deltaY / 10, 10, 100)
+  camera.updateProjectionMatrix()
+}
