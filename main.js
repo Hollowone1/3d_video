@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { VRButton } from 'three/addons/webxr/VRButton.js';
+import { VRButton } from 'three/examples/jsm/webxr/VRButton.js'; // Import correct du VRButton
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'; // Import du loader GLTF
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 100);
@@ -11,8 +12,6 @@ const radius = 30;
 controls.enablePan = false;
 controls.enableZoom = false;
 
-// Points the camera at the horizon by default
-// Also moves the camera away for the OrbitControls target slightly so it works
 let spherical = new THREE.Spherical(1, Math.PI / 2, 0);
 spherical.makeSafe();
 camera.position.setFromSpherical(spherical);
@@ -85,15 +84,24 @@ function animate() {
 
 animate();
 
-document.body.appendChild( VRButton.createButton( renderer ) )
+document.body.appendChild(VRButton.createButton(renderer));
 
 renderer.xr.enabled = true;
 
-renderer.setAnimationLoop( function () {
+// Charger le modèle de ciseaux uniquement lorsqu'on entre en mode VR
+renderer.xr.addEventListener('sessionstart', () => {
+    const loader = new THREE.GLTFLoader();
+    const scissorsModelPath = 'test.glb'; // Remplacez par le chemin de votre modèle GLB
 
-	renderer.render( scene, camera );
+    loader.load(scissorsModelPath, (gltf) => {
+        const scissors = gltf.scene;
+        scene.add(scissors);
 
-} );
+        // Positionner les ciseaux à la place de la main gauche
+        // Remplacez les valeurs x, y, z par les coordonnées appropriées
+        scissors.position.set(x, y, z);
+    });
+});
 
 window.addEventListener('resize', onWindowResize);
 
@@ -101,15 +109,4 @@ function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
-}
-
-renderer.domElement.addEventListener('wheel', handleZoom);
-
-function handleZoom(e) {
-    camera.fov = clamp(camera.fov + e.deltaY / 10, 10, 100);
-    camera.updateProjectionMatrix();
-}
-
-function clamp(value, min, max) {
-    return Math.min(Math.max(value, min), max);
 }
