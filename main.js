@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { VRButton } from 'three/addons/webxr/VRButton.js';
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 100);
@@ -83,6 +84,16 @@ function animate() {
 }
 
 animate();
+
+document.body.appendChild( VRButton.createButton( renderer ) )
+
+renderer.xr.enabled = true;
+
+renderer.setAnimationLoop( function () {
+
+	renderer.render( scene, camera );
+
+} );
 
 window.addEventListener('resize', onWindowResize);
 
